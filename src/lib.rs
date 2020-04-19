@@ -207,3 +207,70 @@ impl FromRequest for RequestId {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App};
+    use bytes::{Buf, Bytes};
+
+    async fn handler(id: RequestId) -> String {
+        id.as_str().to_string()
+    }
+
+    async fn test_get(middleware: RequestIdentifier) -> ServiceResponse {
+        let mut service = test::init_service(
+            App::new()
+                .wrap(middleware)
+                .route("/", web::get().to(handler)),
+        )
+        .await;
+        test::call_service(&mut service, test::TestRequest::get().uri("/").to_request()).await
+    }
+
+    #[actix_rt::test]
+    async fn default_identifier() {
+        let resp = test_get(RequestIdentifier::with_uuid()).await;
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(body.bytes());
+        assert_eq!(uid, body);
+    }
+
+    #[actix_rt::test]
+    async fn deterministic_identifier() {
+        let resp = test_get(RequestIdentifier::with_generator(Box::new(|| {
+            HeaderValue::from_static("look ma, i'm an id")
+        })))
+        .await;
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(body.bytes());
+        assert_eq!(uid, body);
+    }
+
+    #[actix_rt::test]
+    async fn custom_header() {
+        let resp = test_get(RequestIdentifier::with_header("custom-header")).await;
+        assert!(resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .is_none());
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static("custom-header"))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(body.bytes());
+        assert_eq!(uid, body);
+    }
+}
