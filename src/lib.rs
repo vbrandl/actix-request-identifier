@@ -21,7 +21,7 @@ use futures::{
 use uuid::Uuid;
 
 /// The default header used for the request ID.
-pub const DEFAULT_HEADER: &str = "request-id";
+pub const DEFAULT_HEADER: &str = "x-request-id";
 
 /// Possible error types for the middleware.
 #[derive(Debug, Clone)]
