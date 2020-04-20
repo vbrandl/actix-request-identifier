@@ -1,16 +1,32 @@
 [package]
 name = "actix-request-identifier"
-version = "0.1.0"
-authors = ["Valentin Brandl <vbrandl@riseup.net>"]
+authors = ["Valentin Brandl <mail+rust@vbrandl.net>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Middlerware for actix-web to associate an ID with each request."
+documentation = "https://docs.rs/actix-request-identifier"
+exclude = [
+  ".github/*"
+]
+license = "Apache-2.0 OR MIT"
+homepage = "https://github.com/vbrandl/actix-request-identifier"
+repository = "https://github.com/vbrandl/actix-request-identifier"
+readme = "README.md"
+version = "0.1.0"
 
 [dependencies]
 actix-web = "2.0.0"
 futures = "0.3.4"
-uuid = { version = "0.8.1", default-features = false, features = [ "v4", "serde" ] }
+
+[dependencies.uuid]
+optional = true
+version = "0.8.1"
+default-features = false
+features = [ "v4" ]
 
 [dev-dependencies]
 actix-rt = "1.1.0"
 bytes = "0.5.4"
+
+[features]
+default = [ "uuid-generator" ]
+uuid-generator = [ "uuid" ]
