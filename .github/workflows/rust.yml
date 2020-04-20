@@ -91,9 +91,3 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-
-      - run: cargo login ${CRATES_IO_TOKEN}
-        env:
-          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-
-      - run: cargo publish
