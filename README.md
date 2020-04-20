@@ -1,5 +1,7 @@
 # Actix Request Identifier Middleware
 
+[![Latest Version](https://img.shields.io/crates/v/actix-request-identifier.svg)](https://crates.io/crates/actix-request-identifier)
+[![Documentation](https://docs.rs/https://docs.rs/actix-request-identifiermio/badge.svg)](https://docs.rs/actix-request-identifier)
 ![Rust](https://github.com/vbrandl/actix-request-identifier/workflows/Rust/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/vbrandl/merging-iterator/blob/master/LICENSE-MIT)
 [![License](https://img.shields.io/badge/license-Apache-green.svg)](https://github.com/vbrandl/merging-iterator/blob/master/LICENSE-APACHE)
