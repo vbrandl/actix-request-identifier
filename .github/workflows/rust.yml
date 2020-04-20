@@ -93,14 +93,7 @@ jobs:
           command: test
 
       - run: cargo login ${CRATES_IO_TOKEN}
-        on:
-          push:
-            tags:
-              - v*
         env:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+
       - run: cargo publish
-        on:
-          push:
-            tags:
-              - v*
