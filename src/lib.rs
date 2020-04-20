@@ -125,7 +125,9 @@ impl Default for RequestIdentifier {
 /// Default UUID v4 based ID generator.
 fn default_generator() -> HeaderValue {
     let uuid = Uuid::new_v4();
-    HeaderValue::from_str(&uuid.to_hyphenated().to_string()).unwrap()
+    HeaderValue::from_str(&uuid.to_hyphenated().to_string())
+        // This unwrap can never fail since UUID v4 generated IDs are ASCII-only
+        .unwrap()
 }
 
 impl<S, B> Transform<S> for RequestIdentifier
