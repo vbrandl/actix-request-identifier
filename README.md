@@ -9,7 +9,7 @@
 incomming request. By default, a UUID v4 is generated for each request using
 [`uuid`](https://github.com/uuid-rs/uuid). The request ID is set via the
 `x-request-id` HTTP header (which can be configured) and can be extracted from
-the request using `RequestId`
+the request using `RequestId`.
 
 ## Example
 
