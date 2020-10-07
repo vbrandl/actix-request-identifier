@@ -11,10 +11,10 @@ license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/vbrandl/actix-request-identifier"
 repository = "https://github.com/vbrandl/actix-request-identifier"
 readme = "README.md"
-version = "0.1.0"
+version = "0.2.0"
 
 [dependencies]
-actix-web = "2.0.0"
+actix-web = { version = "3.0.0", default-features = false }
 futures = "0.3.4"
 
 [dependencies.uuid]
