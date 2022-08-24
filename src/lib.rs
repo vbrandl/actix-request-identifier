@@ -125,18 +125,17 @@ impl Default for RequestIdentifier {
 /// Default UUID v4 based ID generator.
 fn default_generator() -> HeaderValue {
     let uuid = Uuid::new_v4();
-    HeaderValue::from_str(&uuid.to_hyphenated().to_string())
+    HeaderValue::from_str(&uuid.to_string())
         // This unwrap can never fail since UUID v4 generated IDs are ASCII-only
         .unwrap()
 }
 
-impl<S, B> Transform<S> for RequestIdentifier
+impl<S, B> Transform<S, ServiceRequest> for RequestIdentifier
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = ActixError>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = ActixError>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = S::Request;
     type Response = S::Response;
     type Error = S::Error;
     type InitError = ();
@@ -157,22 +156,21 @@ where
 }
 
 #[allow(clippy::type_complexity)]
-impl<S, B> Service for RequestIdMiddleware<S>
+impl<S, B> Service<ServiceRequest> for RequestIdMiddleware<S>
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = ActixError>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = ActixError>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = S::Request;
     type Response = S::Response;
     type Error = S::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
 
-    fn poll_ready(&mut self, ctx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+    fn poll_ready(&self, ctx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.service.poll_ready(ctx)
     }
 
-    fn call(&mut self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, req: ServiceRequest) -> Self::Future {
         req.extensions_mut().insert(self.id.clone());
         let fut = self.service.call(req);
         // TODO: clone needed?
@@ -192,7 +190,6 @@ where
 impl FromRequest for RequestId {
     type Error = Error;
     type Future = Ready<Result<Self, Self::Error>>;
-    type Config = ();
 
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         ready(
