@@ -205,7 +205,7 @@ impl FromRequest for RequestId {
 mod tests {
     use super::*;
     use actix_web::{test, web, App};
-    use bytes::{Buf, Bytes};
+    use bytes::Bytes;
 
     async fn handler(id: RequestId) -> String {
         id.as_str().to_string()
@@ -230,7 +230,7 @@ mod tests {
             .map(|v| v.to_str().unwrap().to_string())
             .unwrap();
         let body: Bytes = test::read_body(resp).await;
-        let body = String::from_utf8_lossy(body.bytes());
+        let body = String::from_utf8_lossy(&body);
         assert_eq!(uid, body);
     }
 
@@ -246,7 +246,7 @@ mod tests {
             .map(|v| v.to_str().unwrap().to_string())
             .unwrap();
         let body: Bytes = test::read_body(resp).await;
-        let body = String::from_utf8_lossy(body.bytes());
+        let body = String::from_utf8_lossy(&body);
         assert_eq!(uid, body);
     }
 
@@ -263,7 +263,7 @@ mod tests {
             .map(|v| v.to_str().unwrap().to_string())
             .unwrap();
         let body: Bytes = test::read_body(resp).await;
-        let body = String::from_utf8_lossy(body.bytes());
+        let body = String::from_utf8_lossy(&body);
         assert_eq!(uid, body);
     }
 }
