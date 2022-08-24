@@ -18,23 +18,24 @@ the request using `RequestId`.
 
 ```rust
 use actix_request_identifier::{RequestId, RequestIdentifier};
+use actix_web::{get, App, HttpServer, Responder};
 
 #[get("/")]
-async fn index(id: RequestId) -> impl Responder {
-    HttpResponse::Ok().body(format!("{}", id.as_str()))
+async fn show_request_id(id: RequestId) -> impl Responder {
+    format!("{}", id.as_str())
 }
 
-#[actix_rt::main]
-async fn main() {
-    HttpServer::new(move || {
+#[actix_web::main] // or #[tokio::main]
+async fn main() -> std::io::Result<()> {
+    let http_server = HttpServer::new(|| {
         App::new()
+            .service(show_request_id)
             .wrap(RequestIdentifier::with_uuid())
-            .service(index)
-    }).bind("127.0.0.1:8080")
-    .unwrap()
+    })
+    .bind(("127.0.0.1", 8080))?
     .run()
     .await
-    .unwrap();
+}
 ```
 
 The response looks like this:
@@ -54,5 +55,5 @@ date: Mon, 20 Apr 2020 06:53:49 GMT
 `actix-request-identifier` is licensed under either of the following at your
 option:
 
- * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
