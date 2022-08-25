@@ -27,7 +27,7 @@ async fn show_request_id(id: RequestId) -> impl Responder {
 
 #[actix_web::main] // or #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    let http_server = HttpServer::new(|| {
+    HttpServer::new(|| {
         App::new()
             .service(show_request_id)
             .wrap(RequestIdentifier::with_uuid())
