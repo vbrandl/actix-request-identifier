@@ -1,7 +1,7 @@
 # Actix Request Identifier Middleware
 
 [![Latest Version](https://img.shields.io/crates/v/actix-request-identifier.svg)](https://crates.io/crates/actix-request-identifier)
-[![Documentation](https://docs.rs/https://docs.rs/actix-request-identifiermio/badge.svg)](https://docs.rs/actix-request-identifier)
+[![Documentation](https://docs.rs/actix-request-identifier/badge.svg)](https://docs.rs/actix-request-identifier)
 ![Rust](https://github.com/vbrandl/actix-request-identifier/workflows/Rust/badge.svg)
 [![Hits-of-Code](https://hitsofcode.com/github/vbrandl/actix-request-identifier)](https://hitsofcode.com/view/github/vbrandl/actix-request-identifier)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/vbrandl/merging-iterator/blob/master/LICENSE-MIT)
@@ -49,6 +49,14 @@ date: Mon, 20 Apr 2020 06:53:49 GMT
 
 5f099854-2117-49b3-b252-d6693a85acc5
 ```
+
+## Supported `actix-web` Versions
+
+| crate version | `actix-web` version |
+| ------------- | ------------------- |
+| `0.1.0`       | `v2`                |
+| `0.2.0`       | `v3`                |
+| `4.0.0`       | `v4`                |
 
 ## License
 
