@@ -93,7 +93,7 @@ jobs:
           command: test
 
   examples:
-    name: Build examples
+    name: Build Examples
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -127,7 +127,7 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.toml') }}
 
-      - name: Run Tests
+      - name: Build Examples
         uses: actions-rs/cargo@v1
         with:
           command: build
