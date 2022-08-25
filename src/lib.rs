@@ -204,7 +204,7 @@ impl FromRequest for RequestId {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_rt;
+    use actix_rt::test as actix_test;
     use actix_web::{test, web, App};
     use bytes::Bytes;
 
@@ -222,7 +222,7 @@ mod tests {
         test::call_service(&mut service, test::TestRequest::get().uri("/").to_request()).await
     }
 
-    #[actix_rt::test]
+    #[actix_test]
     async fn default_identifier() {
         let resp = test_get(RequestIdentifier::with_uuid()).await;
         let uid = resp
@@ -235,7 +235,7 @@ mod tests {
         assert_eq!(uid, body);
     }
 
-    #[actix_rt::test]
+    #[actix_test]
     async fn deterministic_identifier() {
         let resp = test_get(RequestIdentifier::with_generator(|| {
             HeaderValue::from_static("look ma, i'm an id")
@@ -251,7 +251,7 @@ mod tests {
         assert_eq!(uid, body);
     }
 
-    #[actix_rt::test]
+    #[actix_test]
     async fn custom_header() {
         let resp = test_get(RequestIdentifier::with_header("custom-header")).await;
         assert!(resp
