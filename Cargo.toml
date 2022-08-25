@@ -24,7 +24,6 @@ default-features = false
 features = [ "v4" ]
 
 [dev-dependencies]
-actix-rt = "2.7.0"
 actix-web = "4.1.0"
 bytes = "1.2.1"
 
