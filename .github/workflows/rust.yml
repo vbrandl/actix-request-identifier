@@ -130,4 +130,5 @@ jobs:
       - name: Run Tests
         uses: actions-rs/cargo@v1
         with:
-          command: build --examples
+          command: build
+          args: --examples
