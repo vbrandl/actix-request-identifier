@@ -204,6 +204,7 @@ impl FromRequest for RequestId {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use actix_rt;
     use actix_web::{test, web, App};
     use bytes::Bytes;
 
