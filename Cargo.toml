@@ -14,18 +14,19 @@ readme = "README.md"
 version = "0.2.0"
 
 [dependencies]
-actix-web = { version = "3.0.0", default-features = false }
+actix-web = { version = "4.1.0", default-features = false }
 futures = "0.3.4"
 
 [dependencies.uuid]
 optional = true
-version = "0.8.1"
+version = "1.1.2"
 default-features = false
 features = [ "v4" ]
 
 [dev-dependencies]
-actix-rt = "1.1.0"
-bytes = "0.5.4"
+actix-rt = "2.7.0"
+actix-web = "4.1.0"
+bytes = "1.2.1"
 
 [features]
 default = [ "uuid-generator" ]
