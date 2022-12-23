@@ -138,8 +138,8 @@ where
 {
     type Response = S::Response;
     type Error = S::Error;
-    type InitError = ();
     type Transform = RequestIdMiddleware<S>;
+    type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
@@ -171,11 +171,16 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        let req_headers = req.headers().clone();
         req.extensions_mut().insert(self.id.clone());
         let fut = self.service.call(req);
         // TODO: clone needed?
-        let header_name = self.header_name.clone();
-        let header_value = self.id.header_value().clone();
+        let header_name = HeaderName::from(&self.header_name);
+        let header_value: HeaderValue =
+            HeaderValue::from(match req_headers.get(header_name.clone()) {
+                Some(v) => v,
+                _ => &self.id.header_value(),
+            });
 
         Box::pin(async move {
             let mut res = fut.await?;
@@ -265,5 +270,27 @@ mod tests {
         let body: Bytes = test::read_body(resp).await;
         let body = String::from_utf8_lossy(&body);
         assert_eq!(uid, body);
+    }
+
+    #[actix_web::test]
+    async fn existing_request_id() {
+        let uuid4 = Uuid::new_v4().to_string();
+        let mut service = test::init_service(
+            App::new()
+                .wrap(RequestIdentifier::with_uuid())
+                .route("/", web::get().to(handler)),
+        )
+        .await;
+        let req = test::TestRequest::get()
+            .insert_header((DEFAULT_HEADER, uuid4.as_str()))
+            .uri("/")
+            .to_request();
+        let resp = test::call_service(&mut service, req).await;
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        assert_eq!(uid, uuid4);
     }
 }
