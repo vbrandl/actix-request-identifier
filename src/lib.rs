@@ -30,11 +30,23 @@ pub enum Error {
     NoAssociatedId,
 }
 
+/// Configuration setting to decide weather the request id from the incoming request header should
+/// be used, if present or if a new one should be generated in any case.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum IdReuse {
+    /// Reuse the incoming request id.
+    UseIncoming,
+    /// Ignore the incoming request id and generate a random one, even if the request supplied an
+    /// id.
+    IgnoreIncoming,
+}
+
 /// ID wrapper for requests.
 pub struct RequestIdMiddleware<S> {
     service: S,
     header_name: HeaderName,
-    id: RequestId,
+    id_generator: Generator,
+    use_incoming_id: IdReuse,
 }
 
 type Generator = fn() -> HeaderValue;
@@ -43,6 +55,7 @@ type Generator = fn() -> HeaderValue;
 pub struct RequestIdentifier {
     header_name: &'static str,
     id_generator: Generator,
+    use_incoming_id: IdReuse,
 }
 
 /// Request ID that can be extracted in handlers.
@@ -85,7 +98,7 @@ impl RequestIdentifier {
     pub fn with_header(header_name: &'static str) -> Self {
         Self {
             header_name,
-            id_generator: default_generator,
+            ..Default::default()
         }
     }
 
@@ -104,8 +117,8 @@ impl RequestIdentifier {
     #[must_use]
     pub fn with_generator(id_generator: Generator) -> Self {
         Self {
-            header_name: DEFAULT_HEADER,
             id_generator,
+            ..Default::default()
         }
     }
 
@@ -117,6 +130,19 @@ impl RequestIdentifier {
             ..self
         }
     }
+
+    /// Change the behavior for incoming request id headers. When this is set to
+    /// [`IdReuse::UseIncoming`](./enum.IdReuse.html#variant.UseIncoming) (the default), each request is checked if it
+    /// contains a header by the specified name and if it exists, the id from that header is used, otherwise a random id
+    /// is generated. When this is set to [`IdReuse::IgnoreIncoming`](./enum.IdReuse.html#variant.IgnoreIncoming), the
+    /// id from the request header is ignored.
+    #[must_use]
+    pub fn use_incoming_id(self, use_incoming_id: IdReuse) -> Self {
+        Self {
+            use_incoming_id,
+            ..self
+        }
+    }
 }
 
 impl Default for RequestIdentifier {
@@ -124,6 +150,7 @@ impl Default for RequestIdentifier {
         Self {
             header_name: DEFAULT_HEADER,
             id_generator: default_generator,
+            use_incoming_id: IdReuse::UseIncoming,
         }
     }
 }
@@ -154,6 +181,7 @@ where
             service,
             header_name: HeaderName::from_static(self.header_name),
             id_generator: self.id_generator,
+            use_incoming_id: self.use_incoming_id,
         })
     }
 }
@@ -175,12 +203,15 @@ where
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let header_name = self.header_name.clone();
-        let req_headers = req.headers().clone();
-        let header_value: HeaderValue = HeaderValue::from(
-            req_headers
+        let header_value = match self.use_incoming_id {
+            IdReuse::UseIncoming => req
+                .headers()
                 .get(&header_name)
                 .map_or_else(self.id_generator, |v| v.clone()),
-        );
+            IdReuse::IgnoreIncoming => (self.id_generator)(),
+        };
+
+        // make the id available as an extractor in route handlers
         let request_id = RequestId(header_value.clone());
         req.extensions_mut().insert(request_id);
 
@@ -219,13 +250,21 @@ mod tests {
         id.as_str().to_string()
     }
 
+    // Using a macro to reduce code duplication when initializing the test service.
+    // The return type of `test::init_service` is to complicated to create a normal function.
+    macro_rules! service {
+        ($middleware:expr) => {
+            test::init_service(
+                App::new()
+                    .wrap($middleware)
+                    .route("/", web::get().to(handler)),
+            )
+            .await
+        };
+    }
+
     async fn test_get(middleware: RequestIdentifier) -> ServiceResponse {
-        let service = test::init_service(
-            App::new()
-                .wrap(middleware)
-                .route("/", web::get().to(handler)),
-        )
-        .await;
+        let service = service!(middleware);
         test::call_service(&service, test::TestRequest::get().uri("/").to_request()).await
     }
 
@@ -278,12 +317,7 @@ mod tests {
     #[actix_web::test]
     async fn existing_request_id() {
         let uuid4 = Uuid::new_v4().to_string();
-        let service = test::init_service(
-            App::new()
-                .wrap(RequestIdentifier::with_uuid())
-                .route("/", web::get().to(handler)),
-        )
-        .await;
+        let service = service!(RequestIdentifier::with_uuid());
         let req = test::TestRequest::get()
             .insert_header((DEFAULT_HEADER, uuid4.as_str()))
             .uri("/")
@@ -298,5 +332,29 @@ mod tests {
         let body: Bytes = test::read_body(resp).await;
         let body = String::from_utf8_lossy(&body);
         assert_eq!(body, uuid4);
+    }
+
+    #[actix_web::test]
+    async fn ignore_existing_request_id() {
+        let uuid4 = Uuid::new_v4().to_string();
+        let service = service!(RequestIdentifier::with_uuid()
+            .use_incoming_id(IdReuse::IgnoreIncoming)
+            // use deterministic generator so we can check, if the supplied id is
+            // ignored
+            .generator(|| HeaderValue::from_static("0")));
+        let req = test::TestRequest::get()
+            .insert_header((DEFAULT_HEADER, uuid4.as_str()))
+            .uri("/")
+            .to_request();
+        let resp = test::call_service(&service, req).await;
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        assert_eq!(uid, "0");
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(&body);
+        assert_eq!(body, "0");
     }
 }
