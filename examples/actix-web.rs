@@ -17,5 +17,6 @@ async fn main() -> std::io::Result<()> {
     .run();
     println!("example server listening on 127.0.0.1:8080");
     println!("try `curl -v http://127.0.0.1:8080/`");
+    println!("try `curl -v -H 'x-request-id: 12345' http://127.0.0.1:8080/`");
     http_server.await
 }
