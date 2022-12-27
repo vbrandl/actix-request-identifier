@@ -61,7 +61,8 @@ impl fmt::Display for Error {
 }
 
 impl RequestId {
-    const fn header_value(&self) -> &HeaderValue {
+    /// Get the value of the response header for this request id.
+    pub const fn header_value(&self) -> &HeaderValue {
         &self.0
     }
 
@@ -148,14 +149,11 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        // generate a new ID
-        let value = (self.id_generator)();
-
         // associate with the request
         ok(RequestIdMiddleware {
             service,
             header_name: HeaderName::from_static(self.header_name),
-            id: RequestId(value),
+            id_generator: self.id_generator,
         })
     }
 }
@@ -176,17 +174,17 @@ where
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        let header_name = self.header_name.clone();
         let req_headers = req.headers().clone();
-        req.extensions_mut().insert(self.id.clone());
-        let fut = self.service.call(req);
-        // TODO: clone needed?
-        let header_name = HeaderName::from(&self.header_name);
         let header_value: HeaderValue = HeaderValue::from(
             req_headers
-                .get(header_name.clone())
-                .map_or_else(|| self.id.header_value(), |v| v),
+                .get(&header_name)
+                .map_or_else(self.id_generator, |v| v.clone()),
         );
+        let request_id = RequestId(header_value.clone());
+        req.extensions_mut().insert(request_id);
 
+        let fut = self.service.call(req);
         Box::pin(async move {
             let mut res = fut.await?;
 
@@ -297,5 +295,8 @@ mod tests {
             .map(|v| v.to_str().unwrap().to_string())
             .unwrap();
         assert_eq!(uid, uuid4);
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(&body);
+        assert_eq!(body, uuid4);
     }
 }
