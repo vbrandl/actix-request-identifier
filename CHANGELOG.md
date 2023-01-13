@@ -5,6 +5,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [4.1.0] 2023-01-13
+
 * Breaking: Allow reusing an incoming request id, supplied via the request header ([#7])
 
   This changes the default behavior of the crate and is considered a breaking change.
