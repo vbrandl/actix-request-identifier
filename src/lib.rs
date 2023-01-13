@@ -150,7 +150,7 @@ impl Default for RequestIdentifier {
         Self {
             header_name: DEFAULT_HEADER,
             id_generator: default_generator,
-            use_incoming_id: IdReuse::UseIncoming,
+            use_incoming_id: IdReuse::IgnoreIncoming,
         }
     }
 }
@@ -317,7 +317,8 @@ mod tests {
     #[actix_web::test]
     async fn existing_request_id() {
         let uuid4 = Uuid::new_v4().to_string();
-        let service = service!(RequestIdentifier::with_uuid());
+        let service =
+            service!(RequestIdentifier::with_uuid().use_incoming_id(IdReuse::UseIncoming));
         let req = test::TestRequest::get()
             .insert_header((DEFAULT_HEADER, uuid4.as_str()))
             .uri("/")
@@ -338,7 +339,6 @@ mod tests {
     async fn ignore_existing_request_id() {
         let uuid4 = Uuid::new_v4().to_string();
         let service = service!(RequestIdentifier::with_uuid()
-            .use_incoming_id(IdReuse::IgnoreIncoming)
             // use deterministic generator so we can check, if the supplied id is
             // ignored
             .generator(|| HeaderValue::from_static("0")));
