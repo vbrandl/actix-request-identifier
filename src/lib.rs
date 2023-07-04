@@ -201,7 +201,7 @@ where
         self.service.poll_ready(ctx)
     }
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, mut req: ServiceRequest) -> Self::Future {
         let header_name = self.header_name.clone();
         let header_value = match self.use_incoming_id {
             IdReuse::UseIncoming => req
@@ -214,6 +214,8 @@ where
         // make the id available as an extractor in route handlers
         let request_id = RequestId(header_value.clone());
         req.extensions_mut().insert(request_id);
+        req.headers_mut()
+            .insert(header_name.clone(), header_value.clone());
 
         let fut = self.service.call(req);
         Box::pin(async move {

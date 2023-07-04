@@ -11,7 +11,7 @@ license = "Apache-2.0 OR MIT"
 homepage = "https://github.com/vbrandl/actix-request-identifier"
 repository = "https://github.com/vbrandl/actix-request-identifier"
 readme = "README.md"
-version = "4.1.0"
+version = "4.2.0"
 
 [dependencies]
 actix-web = { version = "4.1.0", default-features = false }
