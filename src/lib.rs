@@ -201,27 +201,27 @@ where
         self.service.poll_ready(ctx)
     }
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, request: ServiceRequest) -> Self::Future {
         let header_name = self.header_name.clone();
         let header_value = match self.use_incoming_id {
-            IdReuse::UseIncoming => req
+            IdReuse::UseIncoming => request
                 .headers()
                 .get(&header_name)
-                .map_or_else(self.id_generator, |v| v.clone()),
+                .map_or_else(self.id_generator, Clone::clone),
             IdReuse::IgnoreIncoming => (self.id_generator)(),
         };
 
         // make the id available as an extractor in route handlers
         let request_id = RequestId(header_value.clone());
-        req.extensions_mut().insert(request_id);
+        request.extensions_mut().insert(request_id);
 
-        let fut = self.service.call(req);
+        let fut = self.service.call(request);
         Box::pin(async move {
-            let mut res = fut.await?;
+            let mut response = fut.await?;
 
-            res.headers_mut().insert(header_name, header_value);
+            response.headers_mut().insert(header_name, header_value);
 
-            Ok(res)
+            Ok(response)
         })
     }
 }
@@ -246,6 +246,7 @@ mod tests {
     use actix_web::{test, web, App};
     use bytes::Bytes;
 
+    #[allow(clippy::unused_async)]
     async fn handler(id: RequestId) -> String {
         id.as_str().to_string()
     }
