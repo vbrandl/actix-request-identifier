@@ -80,6 +80,10 @@ impl RequestId {
     }
 
     /// Get a string representation of this ID
+    ///
+    /// # Panics
+    ///
+    /// If the header value contains non-ASCII characters
     pub fn as_str(&self) -> &str {
         self.0.to_str().expect("Non-ASCII IDs are not supported")
     }
