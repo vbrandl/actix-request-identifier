@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Dependencies
-- Bump `actions/checkout` from 1 to 3 (#12)
+- Bump `actions/checkout` from 1 to 4 (#12, [#16](https://github.com/vbrandl/actix-request-identifier/pull/16))
 - Bump `actions/cache` from 1 to 3 (#13)
 
 ## [4.1.0] 2023-01-13
