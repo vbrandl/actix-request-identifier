@@ -238,7 +238,7 @@ impl FromRequest for RequestId {
         ready(
             req.extensions()
                 .get::<RequestId>()
-                .map(RequestId::clone)
+                .cloned()
                 .ok_or(Error::NoAssociatedId),
         )
     }
