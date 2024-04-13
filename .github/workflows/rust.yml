@@ -33,9 +33,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Clippy Linting
-        run: cargo clippy --all-features -- -Dclippy::all -Dclippy::pedantic
-      - name: Clippy Test Linting
-        run: cargo clippy --tests -- -Dclippy::all -Dclippy::pedantic
+        run: cargo clippy --all-features --tests --examples -- -Dclippy::all -Dclippy::pedantic
 
   test:
     name: Run Tests
@@ -62,7 +60,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Run Tests
-        run: cargo test
+        run: cargo test --all-features
 
   semver-compat:
     name: Check semver compatibilty
@@ -99,4 +97,4 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Build Examples
-        run: cargo build --examples
+        run: cargo build --examples --all-features

@@ -16,7 +16,7 @@ version = "4.1.0"
 [dependencies]
 actix-web = { version = "4.1.0", default-features = false }
 futures = "0.3.4"
-uuid = { version = "1.1.2", default-features = false, features = ["v4"], optional = true}
+uuid = { version = "1.8.0", default-features = false, optional = true }
 
 [dev-dependencies]
 actix-web = "4.1.0"
@@ -24,4 +24,5 @@ bytes = "1.2.1"
 
 [features]
 default = [ "uuid-generator" ]
-uuid-generator = [ "uuid" ]
+uuid-generator = [ "uuid/v4" ]
+uuid-v7-generator = [ "uuid/v7", "uuid/std" ]

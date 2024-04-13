@@ -3,7 +3,7 @@ use actix_web::{get, App, HttpServer, Responder};
 
 #[get("/")]
 async fn show_request_id(id: RequestId) -> impl Responder {
-    format!("{}", id.as_str())
+    id.to_string()
 }
 
 #[actix_web::main] // or #[tokio::main]
