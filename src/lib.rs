@@ -3,7 +3,7 @@
 //! used to track errors in an application.
 
 use std::{
-    fmt,
+    fmt::{self, Display},
     pin::Pin,
     task::{Context, Poll},
 };
@@ -61,6 +61,12 @@ pub struct RequestIdentifier {
 /// Request ID that can be extracted in handlers.
 #[derive(Clone)]
 pub struct RequestId(HeaderValue);
+
+impl Display for RequestId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
 
 impl ResponseError for Error {}
 
