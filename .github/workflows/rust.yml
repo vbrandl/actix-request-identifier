@@ -33,9 +33,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Clippy Linting
-        run: cargo clippy --all-features -- -Dclippy::all -Dclippy::pedantic
-      - name: Clippy Test Linting
-        run: cargo clippy --tests -- -Dclippy::all -Dclippy::pedantic
+        run: cargo clippy --all-features --tests --examples -- -Dclippy::all -Dclippy::pedantic
 
   test:
     name: Run Tests
