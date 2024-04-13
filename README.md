@@ -50,6 +50,11 @@ date: Mon, 20 Apr 2020 06:53:49 GMT
 5f099854-2117-49b3-b252-d6693a85acc5
 ```
 
+If you want chronologically sortable request IDs, you can enable the
+`uuid-v7-generator` feature and `RequestIdentifier::with_uuid_v7()`. This will
+generate request IDs using [UUID Version
+7](https://www.ietf.org/archive/id/draft-peabody-dispatch-new-uuid-format-04.html#name-uuid-version-7).
+
 ## Supported `actix-web` Versions
 
 | crate version | `actix-web` version |
