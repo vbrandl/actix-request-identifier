@@ -26,3 +26,6 @@ bytes = "1.2.1"
 default = [ "uuid-generator" ]
 uuid-generator = [ "uuid/v4" ]
 uuid-v7-generator = [ "uuid/v7", "uuid/std" ]
+
+[package.metadata.docs.rs]
+all-features = true
