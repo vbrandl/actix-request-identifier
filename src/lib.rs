@@ -32,12 +32,13 @@ pub enum Error {
 
 /// Configuration setting to decide weather the request id from the incoming request header should
 /// be used, if present or if a new one should be generated in any case.
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Default)]
 pub enum IdReuse {
     /// Reuse the incoming request id.
     UseIncoming,
     /// Ignore the incoming request id and generate a random one, even if the request supplied an
     /// id.
+    #[default]
     IgnoreIncoming,
 }
 
@@ -99,12 +100,22 @@ impl RequestIdentifier {
     /// Create a default middleware using [`DEFAULT_HEADER`](./constant.DEFAULT_HEADER.html) as the header name and
     /// UUID v4 for ID generation.
     #[must_use]
+    #[cfg(feature = "uuid-generator")]
     pub fn with_uuid() -> Self {
         Self::default()
     }
 
+    /// Create a default middleware using [`DEFAULT_HEADER`](./constant.DEFAULT_HEADER.html) as the header name and
+    /// UUID v7 for ID generation.
+    #[must_use]
+    #[cfg(feature = "uuid-v7-generator")]
+    pub fn with_uuid_v7() -> Self {
+        Self::with_generator(uuid_v7_generator)
+    }
+
     /// Create a middleware using a custom header name and UUID v4 for ID generation.
     #[must_use]
+    #[cfg(feature = "uuid-generator")]
     pub fn with_header(header_name: &'static str) -> Self {
         Self {
             header_name,
@@ -128,7 +139,8 @@ impl RequestIdentifier {
     pub fn with_generator(id_generator: Generator) -> Self {
         Self {
             id_generator,
-            ..Default::default()
+            header_name: DEFAULT_HEADER,
+            use_incoming_id: IdReuse::default(),
         }
     }
 
@@ -155,21 +167,31 @@ impl RequestIdentifier {
     }
 }
 
+#[cfg(feature = "uuid-generator")]
 impl Default for RequestIdentifier {
     fn default() -> Self {
         Self {
             header_name: DEFAULT_HEADER,
             id_generator: default_generator,
-            use_incoming_id: IdReuse::IgnoreIncoming,
+            use_incoming_id: IdReuse::default(),
         }
     }
 }
 
 /// Default UUID v4 based ID generator.
+#[cfg(feature = "uuid-generator")]
 fn default_generator() -> HeaderValue {
     let uuid = Uuid::new_v4();
     HeaderValue::from_str(&uuid.to_string())
         // This unwrap can never fail since UUID v4 generated IDs are ASCII-only
+        .unwrap()
+}
+
+#[cfg(feature = "uuid-v7-generator")]
+fn uuid_v7_generator() -> HeaderValue {
+    let uuid = Uuid::now_v7();
+    HeaderValue::from_str(&uuid.to_string())
+        // This unwrap can never fail since UUID v7 generated IDs are ASCII-only
         .unwrap()
 }
 
@@ -282,6 +304,20 @@ mod tests {
     #[actix_web::test]
     async fn default_identifier() {
         let resp = test_get(RequestIdentifier::with_uuid()).await;
+        let uid = resp
+            .headers()
+            .get(HeaderName::from_static(DEFAULT_HEADER))
+            .map(|v| v.to_str().unwrap().to_string())
+            .unwrap();
+        let body: Bytes = test::read_body(resp).await;
+        let body = String::from_utf8_lossy(&body);
+        assert_eq!(uid, body);
+    }
+
+    #[cfg(feature = "uuid-v7-generator")]
+    #[actix_web::test]
+    async fn uuid_v7() {
+        let resp = test_get(RequestIdentifier::with_uuid_v7()).await;
         let uid = resp
             .headers()
             .get(HeaderName::from_static(DEFAULT_HEADER))
