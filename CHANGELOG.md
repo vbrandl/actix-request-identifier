@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Document all features on docs.rs ([#23](https://github.com/vbrandl/actix-request-identifier/pull/23))
 
+### Dependencies
+- Bump `rustsec/audit-check` from 1 to 2 ([#24](https://github.com/vbrandl/actix-request-identifier/pull/24))
+
 ## [4.2.0] 2024-04-13
 
 * Optional feature to generate UUIDv7 request IDs ([#20](https://github.com/vbrandl/actix-request-identifier/pull/20))
