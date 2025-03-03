@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Dependencies
 - Bump `rustsec/audit-check` from 1 to 2 ([#24](https://github.com/vbrandl/actix-request-identifier/pull/24))
+- Bump `dangoslen/dependabot-changelog-helper` from 3 to 4 ([#25](https://github.com/vbrandl/actix-request-identifier/pull/25))
 
 ## [4.2.0] 2024-04-13
 
