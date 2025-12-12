@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `dangoslen/dependabot-changelog-helper` from 3 to 4 ([#25](https://github.com/vbrandl/actix-request-identifier/pull/25))
 - Bump `stefanzweifel/git-auto-commit-action` from 5 to 7 ([#26](https://github.com/vbrandl/actix-request-identifier/pull/26), [#28](https://github.com/vbrandl/actix-request-identifier/pull/28))
 - Bump `actions/checkout` from 4 to 6 ([#27](https://github.com/vbrandl/actix-request-identifier/pull/27), [#29](https://github.com/vbrandl/actix-request-identifier/pull/29))
+- Bump `actions/cache` from 4 to 5 ([#30](https://github.com/vbrandl/actix-request-identifier/pull/30))
 
 ## [4.2.0] 2024-04-13
 
